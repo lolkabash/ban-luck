@@ -1,13 +1,28 @@
- /*----- constants -----*/
+/*----- constants -----*/
+const startScreen = document.querySelector("#start-screen");
+const gameScreen = document.querySelector("#game-screen");
+const endScreen = document.querySelector("#end-screen");
+const startButton = document.querySelector("#start-button");
+const exitButton = document.querySelector("#exit-button");
 
+/*----- state variables -----*/
+gameScreen.style.display = "none";
+endScreen.style.display = "none";
 
- /*----- state variables -----*/
+/*----- cached elements  -----*/
 
+/*----- event listeners -----*/
+startButton.addEventListener("click", startGame);
+exitButton.addEventListener("click", endGame);
 
- /*----- cached elements  -----*/
+/*----- functions -----*/
+function startGame () {
+  startScreen.style.display = "none";
+  gameScreen.style.display = "block";
+};
 
-
- /*----- event listeners -----*/
-
-
- /*----- functions -----*/
+function endGame () {
+  gameScreen.style.display = "none";
+  endScreen.style.display = "block";
+  
+};

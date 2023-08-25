@@ -13,7 +13,7 @@ let shuffledDeck;
 const shuffledContainer = document.getElementById('shuffled-deck-container');
 
 /*----- event listeners -----*/
-document.querySelector('button').addEventListener('click', renderNewShuffledDeck);
+document.querySelector("#start-button").addEventListener('click', renderNewShuffledDeck);
 
 /*----- functions -----*/
 function getNewShuffledDeck() {
