@@ -10,7 +10,7 @@ renderDeckInContainer(originalDeck, document.getElementById('original-deck-conta
 let shuffledDeck;
 
 /*----- cached element references -----*/
-const shuffledContainer = document.getElementById('shuffled-deck-container');
+// const shuffledContainer = document.getElementById('shuffled-deck-container');
 
 /*----- event listeners -----*/
 document.querySelector("#start-button").addEventListener('click', renderNewShuffledDeck);
@@ -26,6 +26,8 @@ function getNewShuffledDeck() {
     // Note the [0] after splice - this is because splice always returns an array and we just want the card object in that array
     newShuffledDeck.push(tempDeck.splice(rndIdx, 1)[0]);
   }
+  console.log(newShuffledDeck);
+  console.log(newShuffledDeck[0]);
   return newShuffledDeck;
 }
 
