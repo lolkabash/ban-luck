@@ -254,7 +254,7 @@ function run() {
 }
 
 function dealerTurn() {
-  while (dealerHandValue < 16) {
+  while (dealerHandValue < 16 && dealerHandArr.length < 5) {
     let card = deck.pop();
     dealerHandValue += card.value;
     dealerAceCount += checkAce(card);
