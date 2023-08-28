@@ -13,35 +13,28 @@
     <div id="start-screen">
       <div>
         <h2>Welcome to Ban Luck!</h2>
-        <input type="number" placeholder="Enter your bet here" />
+        $ <input type="number" placeholder="Enter your bet here" />
         <button id="start-button">Start Game</button>
       </div>
       <div id="player-balance"></div>
     </div>
 
     <div id="game-screen">
-      <div class="hand" id="dealer-hand">
-      </div>
-      <div class="hand" id="player-hand">
-      </div>
+      <p>Dealer's Hand</p>
+      <div class="hand" id="dealer-hand"></div>
+      <p>Player's Hand</p>
+      <div class="hand" id="player-hand"></div>
       <div>
         <button id="hit-button">Hit</button>
         <button id="stand-button">Stand</button>
         <button id="run-button">Run</button>
       </div>
     </div>
-
+    <br />
     <div id="end-screen">
       <div id="end-state"></div>
       <button id="continue-button">Continue</button>
       <button id="exit-button">Exit</button>
     </div>
-
-    <!-- <h3>Original Deck</h3>
-    <section id="original-deck-container" class="card-container"></section>
-    <button id="shuffle">RE-SHUFFLE DECK</button>
-    <h3>Shuffled Deck</h3>
-    <section id="shuffled-deck-container" class="card-container"></section> -->
-
   </body>
 </html>

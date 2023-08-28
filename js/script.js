@@ -32,24 +32,25 @@ const ranks = [
   "K",
   "A",
 ];
-const originalDeck = buildOriginalDeck();
+const deck = [];
 
 /*----- state variables -----*/
 let playerBalance = 1000;
 let betValue = 0;
 // result 0 = draw, 1 = player wins, 2 = player loses, 3 = player runs
 let gameResult = 0;
+let betResult = 0;
 
+let playerHandArr = [];
+let dealerHandArr = [];
 let playerHandValue = 0;
 let dealerHandValue = 0;
-
-const newShuffledDeck = [];
+let playerAceCount = 0;
+let dealerAceCount = 0;
 
 /*----- cached elements  -----*/
 gameScreen.style.display = "none";
 endScreen.style.display = "none";
-
-runButton.disabled = true;
 
 /*----- event listeners -----*/
 startButton.addEventListener("click", startGame);
@@ -65,9 +66,10 @@ function renderStartScreen() {
   const playerB = document.querySelector("#player-balance");
   playerB.innerHTML = "";
   const playerBal = document.createElement("p");
-  playerBal.innerText = `Your current balance is ${playerBalance}`;
+  playerBal.innerText = `Your current balance is $${playerBalance}`;
   playerB.append(playerBal);
 }
+renderStartScreen();
 
 function bet() {
   betValue = document.querySelector("input").value;
@@ -91,37 +93,67 @@ function startGame() {
   startScreen.style.display = "none";
   gameScreen.style.display = "block";
   bet();
-  dealHands();
+  buildOriginalDeck();
+  shuffleDeck();
+  dealPlayerHand();
+  dealDealerHand();
+  renderGameScreen();
+  checkInstant();
 }
 
-function dealHands() {
-  getNewShuffledDeck();
-
-  const playerCardOne = newShuffledDeck[0];
-  const playerCardTwo = newShuffledDeck[1];
-  const dealerCardOne = newShuffledDeck[2];
-  const dealerCardTwo = newShuffledDeck[3];
-
-  const playerStartHand = [playerCardOne, playerCardTwo];
-  const dealerStartHand = [dealerCardOne, dealerCardTwo];
-
-  playerHand.innerHTML = "";
-  dealerHand.innerHTML = "";
-
-  playerStartHand.forEach(function (card) {
-    let cardHtml = "";
+function renderHands(cards, container) {
+  container.innerHTML = "";
+  let cardHtml = "";
+  cards.forEach(function (card) {
     cardHtml += `<div class="card ${card.face}"></div>`;
-    playerHand.append(cardHtml);
   });
+  container.innerHTML = cardHtml;
+}
 
-  dealerStartHand.forEach(function (card) {
-    let cardHtml = "";
-    cardHtml += `<div class="card ${card.face}"></div>`;
-    dealerHand.append(cardHtml);
-  });
+function checkAce(card) {
+  if (card.rank === "A") {
+    return 1;
+  }
+  return 0;
+}
 
-  playerHandValue = playerCardOne.value + playerCardTwo.value;
-  dealerHandValue = dealerCardOne.value + dealerCardTwo.value;
+function reduceAce(handValue, aceCount) {
+  while (handValue > 21 && aceCount > 0) {
+    handValue -= 10;
+    aceCount -= 1;
+  }
+  return handValue;
+}
+
+function dealPlayerHand() {
+  playerHandArr = [];
+  playerHandValue = 0;
+  playerAceCount = 0;
+  for (i = 0; i < 2; i++) {
+    let card = deck.pop();
+    playerHandValue += card.value;
+    playerAceCount += checkAce(card);
+    playerHandArr.push(card);
+  }
+}
+
+function dealDealerHand() {
+  dealerHandArr = [];
+  dealerHandValue = 0;
+  for (i = 0; i < 2; i++) {
+    let card = deck.pop();
+    dealerHandValue += card.value;
+    dealerAceCount += checkAce(card);
+    dealerHandArr.push(card);
+  }
+}
+
+function renderGameScreen() {
+  hitButton.disabled = false;
+  standButton.disabled = false;
+  runButton.disable = true;
+  renderHands(playerHandArr, playerHand);
+  renderHands(dealerHandArr, dealerHand);
 
   if (playerHandValue === 15) {
     standButton.disabled = true;
@@ -131,13 +163,88 @@ function dealHands() {
   }
 }
 
+function checkInstant() {
+  if (playerHandValue === 21 && dealerHandValue !== 21) {
+    betResult = parseInt(betValue) * 2;
+    playerBalance = playerBalance + betResult;
+    gameResult = 1;
+    endGame();
+  } else if (
+    playerHandArr[0].rank === "A" &&
+    playerHandArr[1].rank === "A" &&
+    dealerHandArr[0].rank !== "A" &&
+    dealerHandValue !== 21
+  ) {
+    betResult = parseInt(betValue) * 3;
+    playerBalance = playerBalance + betResult;
+    gameResult = 1;
+    endGame();
+  } else if (dealerHandValue === 21 && playerHandValue !== 21) {
+    betResult = parseInt(betValue) * 2;
+    playerBalance = playerBalance - betResult;
+    gameResult = 2;
+    endGame();
+  } else if (
+    dealerHandArr[0].rank === "A" &&
+    dealerHandArr[1].rank === "A" &&
+    playerHandArr[0].rank !== "A" &&
+    playerHandValue !== 21
+  ) {
+    betResult = parseInt(betValue) * 3;
+    playerBalance = playerBalance + betResult;
+    gameResult = 2;
+    endGame();
+  } else if (playerHandValue === 21 && dealerHandValue === 21) {
+    gameResult = 0;
+    endGame();
+  } else if (
+    playerHandArr[0].rank === "A" &&
+    playerHandArr[1].rank === "A" &&
+    dealerHandArr[0].rank === "A" &&
+    dealerHandArr[1].rank === "A"
+  ) {
+    gameResult = 0;
+    endGame();
+  }
+}
+
 function hit() {
-  if (playerHandValue > 21 || playerHand.length === 5) {
+  let card = deck.pop();
+  playerHandValue += card.value;
+  playerAceCount += checkAce(card);
+  playerHandValue = reduceAce(playerHandValue, playerAceCount);
+  playerHandArr.push(card);
+  renderHands(playerHandArr, playerHand);
+
+  // if (playerHandArr.length === 5 && playerHandValue <= 21) {
+  //   betResult = parseInt(betValue) * 2;
+  //   playerBalance = playerBalance + betResult;
+  //   gameResult = 1;
+  //   endGame();
+  // }
+  if (
+    playerHandArr.length === 3 &&
+    playerHandArr[0].rank === "07" &&
+    playerHandArr[1].rank === "07" &&
+    playerHandArr[2].rank === "07"
+  ) {
+    betResult = parseInt(betValue) * 7;
+    playerBalance = playerBalance + betResult;
+    gameResult = 1;
+    endGame();
+  }
+
+  if (playerHandValue >= 16) {
+    standButton.disabled = false;
+  }
+  if (playerHandValue > 21 || playerHandArr.length === 5) {
     hitButton.disabled = true;
   }
 }
 
 function stand() {
+  playerHandValue = reduceAce(playerHandValue, playerAceCount);
+  dealerHandValue = reduceAce(dealerHandValue, dealerAceCount);
   determineResult();
 }
 
@@ -146,13 +253,32 @@ function run() {
   endGame();
 }
 
+function dealerTurn() {
+  while (dealerHandValue < 16) {
+    let card = deck.pop();
+    dealerHandValue += card.value;
+    dealerAceCount += checkAce(card);
+    dealerHandValue = reduceAce(dealerHandValue, dealerAceCount);
+    dealerHandArr.push(card);
+    renderHands(dealerHandArr, dealerHand);
+  }
+}
+
 function determineResult() {
+  dealerTurn();
   if (
     playerHandValue > 21 ||
     (dealerHandValue <= 21 && dealerHandValue > playerHandValue)
   ) {
+    betResult = parseInt(betValue);
+    playerBalance = playerBalance - betResult;
     gameResult = 2;
-  } else if (dealerHandValue > 21 || playerHandValue > dealerHandValue) {
+  } else if (
+    dealerHandValue > 21 ||
+    (playerHandValue <= 21 && playerHandValue > dealerHandValue)
+  ) {
+    betResult = parseInt(betValue);
+    playerBalance = playerBalance + betResult;
     gameResult = 1;
   } else {
     gameResult = 0;
@@ -160,39 +286,43 @@ function determineResult() {
   endGame();
 }
 
+function endGame() {
+  endScreen.style.display = "block";
+  renderEndScreen();
+}
+
 function renderEndScreen() {
+  hitButton.disabled = true;
+  standButton.disabled = true;
+  runButton.disabled = true;
   const endState = document.querySelector("#end-state");
   endState.innerText = "";
   const gameRes = document.createElement("p");
   if (gameResult === 1) {
-    gameRes.innerText = `Congratulations! You won`;
+    gameRes.innerText = `Congratulations! You won $${betResult} :)`;
   } else if (gameResult === 2) {
-    gameRes.innerText = `Oh no! You lost`;
+    gameRes.innerText = `Oh no! You lost $${betResult} :(`;
   } else if (gameResult === 3) {
     gameRes.innerText = `You decided to run! Let's go again!`;
   } else {
     gameRes.innerText = `It's a draw!`;
   }
   const playerBal = document.createElement("p");
-  playerBal.innerText = `Your new balance is ${playerBalance}`;
+  playerBal.innerText = `Your new balance is $${playerBalance}`;
   endState.append(gameRes);
   endState.append(playerBal);
   return playerBal;
 }
 
-function endGame() {
-  gameScreen.style.display = "none";
-  endScreen.style.display = "block";
-  renderEndScreen();
-}
-
 function continueGame() {
+  gameScreen.style.display = "none";
   endScreen.style.display = "none";
   startScreen.style.display = "block";
   renderStartScreen();
 }
 
 function exitGame() {
+  gameScreen.style.display = "none";
   endScreen.style.display = "none";
   startScreen.style.display = "block";
   playerBalance = 1000;
@@ -201,7 +331,6 @@ function exitGame() {
 
 //* card library-----------------------
 function buildOriginalDeck() {
-  const deck = [];
   // Use nested forEach to generate card objects
   suits.forEach(function (suit) {
     ranks.forEach(function (rank) {
@@ -210,37 +339,18 @@ function buildOriginalDeck() {
         face: `${suit}${rank}`,
         // Setting the 'value' property for game of blackjack
         value: Number(rank) || (rank === "A" ? 11 : 10),
+        rank: rank,
       });
     });
   });
   return deck;
 }
 
-function getNewShuffledDeck() {
-  // Create a copy of the originalDeck (leave originalDeck untouched!)
-  const tempDeck = [...originalDeck];
-  while (tempDeck.length) {
-    // Get a random index for a card still in the tempDeck
-    const rndIdx = Math.floor(Math.random() * tempDeck.length);
-    // Note the [0] after splice - this is because splice always returns an array and we just want the card object in that array
-    newShuffledDeck.push(tempDeck.splice(rndIdx, 1)[0]);
+function shuffleDeck() {
+  for (i = 0; i < deck.length; i++) {
+    const rndIdx = Math.floor(Math.random() * deck.length);
+    let tempDeck = deck[i];
+    deck[i] = deck[rndIdx];
+    deck[rndIdx] = tempDeck;
   }
-  return newShuffledDeck;
 }
-
-// function renderDeckInContainer(deck, container) {
-//   container.innerHTML = "";
-//   // Let's build the cards as a string of HTML
-//   let cardsHtml = "";
-//   deck.forEach(function (card) {
-//     cardsHtml += `<div class="card ${card.face}"></div>`;
-//   });
-//   // Or, use reduce to 'reduce' the array into a single thing - in this case a string of HTML markup
-//   // const cardsHtml = deck.reduce(function(html, card) {
-//   //   return html + `<div class="card ${card.face}"></div>`;
-//   // }, '');
-//   container.innerHTML = cardsHtml;
-// }
-
-renderStartScreen();
-renderEndScreen();
