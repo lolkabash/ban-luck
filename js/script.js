@@ -5,8 +5,9 @@ const startScreen = document.querySelector("#start-screen");
 const gameScreen = document.querySelector("#game-screen");
 const endScreen = document.querySelector("#end-screen");
 
-const dealerHand = document.querySelector("#dealer-hand");
 const playerHand = document.querySelector("#player-hand");
+const dealerHand = document.querySelector("#dealer-hand");
+const hands = document.querySelectorAll(".hand");
 
 const startButton = document.querySelector("#start-button");
 const hitButton = document.querySelector("#hit-button");
@@ -36,17 +37,19 @@ const originalDeck = buildOriginalDeck();
 /*----- state variables -----*/
 let playerBalance = 1000;
 let betValue = 0;
-// result 0 = draw, 1 = player wins, 2 = player loses
+// result 0 = draw, 1 = player wins, 2 = player loses, 3 = player runs
 let gameResult = 0;
 
-let dealerHandValue = 0;
 let playerHandValue = 0;
+let dealerHandValue = 0;
 
-let shuffledDeck;
+const newShuffledDeck = [];
 
 /*----- cached elements  -----*/
 gameScreen.style.display = "none";
 endScreen.style.display = "none";
+
+runButton.disabled = true;
 
 /*----- event listeners -----*/
 startButton.addEventListener("click", startGame);
@@ -59,9 +62,11 @@ exitButton.addEventListener("click", exitGame);
 /*----- functions -----*/
 //* game state------------------------
 function renderStartScreen() {
+  const playerB = document.querySelector("#player-balance");
+  playerB.innerHTML = "";
   const playerBal = document.createElement("p");
   playerBal.innerText = `Your current balance is ${playerBalance}`;
-  startScreen.append(playerBal);
+  playerB.append(playerBal);
 }
 
 function bet() {
@@ -91,41 +96,88 @@ function startGame() {
 
 function dealHands() {
   getNewShuffledDeck();
-  let handsHtml = "";
-  for (i=0; i < 2; i++) {
-    handsHtml += `<div class="card ${newShuffledDeck[i].face}"></div>`;
-    return handsHtml;
+
+  const playerCardOne = newShuffledDeck[0];
+  const playerCardTwo = newShuffledDeck[1];
+  const dealerCardOne = newShuffledDeck[2];
+  const dealerCardTwo = newShuffledDeck[3];
+
+  const playerStartHand = [playerCardOne, playerCardTwo];
+  const dealerStartHand = [dealerCardOne, dealerCardTwo];
+
+  playerHand.innerHTML = "";
+  dealerHand.innerHTML = "";
+
+  playerStartHand.forEach(function (card) {
+    let cardHtml = "";
+    cardHtml += `<div class="card ${card.face}"></div>`;
+    playerHand.append(cardHtml);
+  });
+
+  dealerStartHand.forEach(function (card) {
+    let cardHtml = "";
+    cardHtml += `<div class="card ${card.face}"></div>`;
+    dealerHand.append(cardHtml);
+  });
+
+  playerHandValue = playerCardOne.value + playerCardTwo.value;
+  dealerHandValue = dealerCardOne.value + dealerCardTwo.value;
+
+  if (playerHandValue === 15) {
+    standButton.disabled = true;
+    runButton.disabled = false;
+  } else if (playerHandValue < 16) {
+    standButton.disabled = true;
   }
-  playerHand.append(handsHtml);
 }
 
-function hit(){
-
+function hit() {
+  if (playerHandValue > 21 || playerHand.length === 5) {
+    hitButton.disabled = true;
+  }
 }
 
-function stand(){
-
+function stand() {
+  determineResult();
 }
 
-function run(){
-
+function run() {
+  gameResult = 3;
+  endGame();
 }
 
 function determineResult() {
-
+  if (
+    playerHandValue > 21 ||
+    (dealerHandValue <= 21 && dealerHandValue > playerHandValue)
+  ) {
+    gameResult = 2;
+  } else if (dealerHandValue > 21 || playerHandValue > dealerHandValue) {
+    gameResult = 1;
+  } else {
+    gameResult = 0;
+  }
+  endGame();
 }
 
 function renderEndScreen() {
   const endState = document.querySelector("#end-state");
+  endState.innerText = "";
   const gameRes = document.createElement("p");
   if (gameResult === 1) {
-    gameRes.innerText = `Congratulations! You won `
+    gameRes.innerText = `Congratulations! You won`;
   } else if (gameResult === 2) {
-
-  } else 
+    gameRes.innerText = `Oh no! You lost`;
+  } else if (gameResult === 3) {
+    gameRes.innerText = `You decided to run! Let's go again!`;
+  } else {
+    gameRes.innerText = `It's a draw!`;
+  }
   const playerBal = document.createElement("p");
   playerBal.innerText = `Your new balance is ${playerBalance}`;
+  endState.append(gameRes);
   endState.append(playerBal);
+  return playerBal;
 }
 
 function endGame() {
@@ -137,12 +189,14 @@ function endGame() {
 function continueGame() {
   endScreen.style.display = "none";
   startScreen.style.display = "block";
+  renderStartScreen();
 }
 
 function exitGame() {
   endScreen.style.display = "none";
   startScreen.style.display = "block";
   playerBalance = 1000;
+  renderStartScreen();
 }
 
 //* card library-----------------------
@@ -165,31 +219,28 @@ function buildOriginalDeck() {
 function getNewShuffledDeck() {
   // Create a copy of the originalDeck (leave originalDeck untouched!)
   const tempDeck = [...originalDeck];
-  const newShuffledDeck = [];
   while (tempDeck.length) {
     // Get a random index for a card still in the tempDeck
     const rndIdx = Math.floor(Math.random() * tempDeck.length);
     // Note the [0] after splice - this is because splice always returns an array and we just want the card object in that array
     newShuffledDeck.push(tempDeck.splice(rndIdx, 1)[0]);
   }
-  console.log(newShuffledDeck);
-  console.log(newShuffledDeck[0]);
   return newShuffledDeck;
 }
 
-function renderDeckInContainer(deck, container) {
-  container.innerHTML = "";
-  // Let's build the cards as a string of HTML
-  let cardsHtml = "";
-  deck.forEach(function (card) {
-    cardsHtml += `<div class="card ${card.face}"></div>`;
-  });
-  // Or, use reduce to 'reduce' the array into a single thing - in this case a string of HTML markup
-  // const cardsHtml = deck.reduce(function(html, card) {
-  //   return html + `<div class="card ${card.face}"></div>`;
-  // }, '');
-  container.innerHTML = cardsHtml;
-}
+// function renderDeckInContainer(deck, container) {
+//   container.innerHTML = "";
+//   // Let's build the cards as a string of HTML
+//   let cardsHtml = "";
+//   deck.forEach(function (card) {
+//     cardsHtml += `<div class="card ${card.face}"></div>`;
+//   });
+//   // Or, use reduce to 'reduce' the array into a single thing - in this case a string of HTML markup
+//   // const cardsHtml = deck.reduce(function(html, card) {
+//   //   return html + `<div class="card ${card.face}"></div>`;
+//   // }, '');
+//   container.innerHTML = cardsHtml;
+// }
 
 renderStartScreen();
 renderEndScreen();

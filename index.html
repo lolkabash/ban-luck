@@ -11,19 +11,20 @@
 
   <body>
     <div id="start-screen">
-      <h2>Welcome to Ban Luck!</h2>
-      <input type="number" placeholder="Enter your bet here" />
-      <button id="start-button">Start Game</button>
+      <div>
+        <h2>Welcome to Ban Luck!</h2>
+        <input type="number" placeholder="Enter your bet here" />
+        <button id="start-button">Start Game</button>
+      </div>
+      <div id="player-balance"></div>
     </div>
 
     <div id="game-screen">
       <div class="hand" id="dealer-hand">
-        <div class="card"></div>
-        <div class="card"></div>
       </div>
       <div class="hand" id="player-hand">
       </div>
-      <div id="actions">
+      <div>
         <button id="hit-button">Hit</button>
         <button id="stand-button">Stand</button>
         <button id="run-button">Run</button>
@@ -32,8 +33,6 @@
 
     <div id="end-screen">
       <div id="end-state"></div>
-      <!-- <p id="game-result"></p>
-      <p class="player-balance"></p> -->
       <button id="continue-button">Continue</button>
       <button id="exit-button">Exit</button>
     </div>
@@ -45,5 +44,4 @@
     <section id="shuffled-deck-container" class="card-container"></section> -->
 
   </body>
-
 </html>
