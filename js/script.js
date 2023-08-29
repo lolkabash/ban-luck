@@ -70,19 +70,19 @@ function renderStartScreen() {
 renderStartScreen();
 
 function bet() {
+  const errorMessage = document.querySelector("#error-message");
+  errorMessage.innerText = "";
   betValue = document.querySelector("input").value;
   if (betValue > playerBalance) {
     startScreen.style.display = "block";
     gameScreen.style.display = "none";
-    return alert(
-      "Your bet cannot be more than your current balance! Please enter a lower bet."
-    );
+    errorMessage.innerText= `Your bet cannot be more than your current balance! Please enter a lower bet.`;
+    return;
   } else if (betValue <= 0) {
     startScreen.style.display = "block";
     gameScreen.style.display = "none";
-    return alert(
-      "Your bet cannot be negative or zero. Please enter a higher bet."
-    );
+    errorMessage.innerText = `Your bet is invalid. Please enter a whole number greater than zero.`;
+    return;
   }
   return betValue;
 }
@@ -305,19 +305,17 @@ function renderEndScreen() {
   runButton.disabled = true;
   const endState = document.querySelector("#end-state");
   endState.innerText = "";
-  const gameRes = document.createElement("p");
   if (gameResult === 1) {
-    gameRes.innerText = `Congratulations! You won $${betResult} :)`;
+    endState.innerText = `Congratulations! You won $${betResult} :)`;
   } else if (gameResult === 2) {
-    gameRes.innerText = `Oh no! You lost $${betResult} :(`;
+    endState.innerText = `Oh no! You lost $${betResult} :(`;
   } else if (gameResult === 3) {
-    gameRes.innerText = `You decided to run! Let's go again!`;
+    endState.innerText = `You decided to run! Let's go again!`;
   } else {
-    gameRes.innerText = `It's a draw!`;
+    endState.innerText = `It's a draw!`;
   }
-  const playerBal = document.createElement("p");
+  const playerBal = document.querySelector("#player-new-balance");
   playerBal.innerText = `Your new balance is $${playerBalance}`;
-  endState.append(gameRes);
   endState.append(playerBal);
   return playerBal;
 }
