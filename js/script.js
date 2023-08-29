@@ -63,11 +63,9 @@ exitButton.addEventListener("click", exitGame);
 /*----- functions -----*/
 //* game state------------------------
 function renderStartScreen() {
-  const playerB = document.querySelector("#player-balance");
-  playerB.innerHTML = "";
-  const playerBal = document.createElement("p");
+  const playerBal = document.querySelector("#player-balance");
+  playerBal.innerHTML = "";
   playerBal.innerText = `Your current balance is $${playerBalance}`;
-  playerB.append(playerBal);
 }
 renderStartScreen();
 
@@ -93,7 +91,7 @@ function startGame() {
   startScreen.style.display = "none";
   gameScreen.style.display = "block";
   bet();
-  buildOriginalDeck();
+  buildDeck();
   shuffleDeck();
   dealPlayerHand();
   dealDealerHand();
@@ -117,14 +115,6 @@ function checkAce(card) {
   return 0;
 }
 
-function reduceAce(handValue, aceCount) {
-  while (handValue > 21 && aceCount > 0) {
-    handValue = handValue - 10;
-    aceCount = aceCount - 1;
-  }
-  return handValue;
-}
-
 function dealPlayerHand() {
   playerHandArr = [];
   playerHandValue = 0;
@@ -140,6 +130,7 @@ function dealPlayerHand() {
 function dealDealerHand() {
   dealerHandArr = [];
   dealerHandValue = 0;
+  dealerAceCount = 0;
   for (i = 0; i < 2; i++) {
     let card = deck.pop();
     dealerHandValue += card.value;
@@ -208,17 +199,27 @@ function checkInstant() {
   }
 }
 
+function reduceAce(handValue, aceCount) {
+  while (handValue > 21 && aceCount > 0) {
+    handValue -= 10;
+    aceCount--;
+  }
+  return {handValue, aceCount};
+}
+
 function clickHit() {
   let card = deck.pop();
-  console.log(card);
   playerHandValue += card.value;
   playerAceCount += checkAce(card);
-  playerHandValue = reduceAce(playerHandValue, playerAceCount);
-  playerHandValue = playerHandArr.push(card);
+  let player = reduceAce(playerHandValue, playerAceCount);
+  playerHandValue = player.handValue;
+  playerAceCount = player.aceCount;
+  playerHandArr.push(card);
   renderHands(playerHandArr, playerHand);
 
   if (playerHandValue >= 16) {
     standButton.disabled = false;
+    runButton.disabled = true;
   }
   if (playerHandValue > 21 || playerHandArr.length === 5) {
     hitButton.disabled = true;
@@ -226,13 +227,12 @@ function clickHit() {
 }
 
 function checkHit() {
-  // if (playerHandArr.length === 5 && playerHandValue <= 21) {
-  //   betResult = parseInt(betValue) * 2;
-  //   playerBalance = playerBalance + betResult;
-  //   gameResult = 1;
-  //   endGame();
-  // } else if (
-  if (
+  if (playerHandArr.length === 5 && playerHandValue <= 21) {
+    betResult = parseInt(betValue) * 2;
+    playerBalance = playerBalance + betResult;
+    gameResult = 1;
+    endGame();
+  } else if (
     playerHandArr.length === 3 &&
     playerHandArr[0].rank === "07" &&
     playerHandArr[1].rank === "07" &&
@@ -264,7 +264,9 @@ function dealerTurn() {
     let card = deck.pop();
     dealerHandValue += card.value;
     dealerAceCount += checkAce(card);
-    dealerHandValue = reduceAce(dealerHandValue, dealerAceCount);
+    let dealer = reduceAce(dealerHandValue, dealerAceCount);
+    dealerHandValue = dealer.handValue;
+    dealerAceCount = dealer.aceCount;
     dealerHandArr.push(card);
     renderHands(dealerHandArr, dealerHand);
   }
@@ -336,7 +338,7 @@ function exitGame() {
 }
 
 //* card library-----------------------
-function buildOriginalDeck() {
+function buildDeck() {
   suits.forEach(function (suit) {
     ranks.forEach(function (rank) {
       deck.push({
