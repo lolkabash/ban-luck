@@ -119,8 +119,8 @@ function checkAce(card) {
 
 function reduceAce(handValue, aceCount) {
   while (handValue > 21 && aceCount > 0) {
-    handValue -= 10;
-    aceCount -= 1;
+    handValue = handValue - 10;
+    aceCount = aceCount - 1;
   }
   return handValue;
 }
@@ -151,7 +151,7 @@ function dealDealerHand() {
 function renderGameScreen() {
   hitButton.disabled = false;
   standButton.disabled = false;
-  runButton.disable = true;
+  runButton.disabled = true;
   renderHands(playerHandArr, playerHand);
   renderHands(dealerHandArr, dealerHand);
 
@@ -208,20 +208,30 @@ function checkInstant() {
   }
 }
 
-function hit() {
+function clickHit() {
   let card = deck.pop();
+  console.log(card);
   playerHandValue += card.value;
   playerAceCount += checkAce(card);
   playerHandValue = reduceAce(playerHandValue, playerAceCount);
-  playerHandArr.push(card);
+  playerHandValue = playerHandArr.push(card);
   renderHands(playerHandArr, playerHand);
 
+  if (playerHandValue >= 16) {
+    standButton.disabled = false;
+  }
+  if (playerHandValue > 21 || playerHandArr.length === 5) {
+    hitButton.disabled = true;
+  }
+}
+
+function checkHit() {
   // if (playerHandArr.length === 5 && playerHandValue <= 21) {
   //   betResult = parseInt(betValue) * 2;
   //   playerBalance = playerBalance + betResult;
   //   gameResult = 1;
   //   endGame();
-  // }
+  // } else if (
   if (
     playerHandArr.length === 3 &&
     playerHandArr[0].rank === "07" &&
@@ -233,18 +243,14 @@ function hit() {
     gameResult = 1;
     endGame();
   }
+}
 
-  if (playerHandValue >= 16) {
-    standButton.disabled = false;
-  }
-  if (playerHandValue > 21 || playerHandArr.length === 5) {
-    hitButton.disabled = true;
-  }
+function hit() {
+  clickHit();
+  checkHit();
 }
 
 function stand() {
-  playerHandValue = reduceAce(playerHandValue, playerAceCount);
-  dealerHandValue = reduceAce(dealerHandValue, dealerAceCount);
   determineResult();
 }
 
@@ -331,13 +337,10 @@ function exitGame() {
 
 //* card library-----------------------
 function buildOriginalDeck() {
-  // Use nested forEach to generate card objects
   suits.forEach(function (suit) {
     ranks.forEach(function (rank) {
       deck.push({
-        // The 'face' property maps to the library's CSS classes for cards
         face: `${suit}${rank}`,
-        // Setting the 'value' property for game of blackjack
         value: Number(rank) || (rank === "A" ? 11 : 10),
         rank: rank,
       });
