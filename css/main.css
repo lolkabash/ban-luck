@@ -5,7 +5,10 @@
 body {
   font-family: sans-serif;
   font-size: 18px;
-  color: whitesmoke;
+  font-weight: bold;
+  text-shadow: -1px 1px 2px black, 1px 2px 6px black,
+  1px -1px 0 black, -1px -1px 0 black;
+  color: #FFFDD0;
   text-align: center;
   background-color: #35654d;
   background-size: cover;
@@ -17,11 +20,13 @@ body {
 #end-screen {
   background-color: #35654d;
   opacity: 0.75;
+  font-weight: bolder;
 }
 
 #error-message {
   color: #FFCEBD;
   font-style: italic;
+  font-size: 16px;
 }
 
 .card-container {
