@@ -255,6 +255,11 @@ function checkHit() {
     player.balance = player.balance + bet.result;
     gameResult = 1;
     displayResult();
+  } else if (player.handArr.length === 5 && player.handValue > 21) {
+    bet.result = parseInt(bet.value) * 2;
+    player.balance = player.balance - bet.result;
+    gameResult = 2;
+    displayResult();
   } else if (
     player.handArr.length === 3 &&
     player.handArr[0].rank === "07" &&
@@ -283,7 +288,7 @@ function dealerTurn() {
 }
 
 function dealerHit() {
-  while (dealer.handValue < 16 && dealer.handArr.length < 5) {
+  while (dealer.handValue < 17 && dealer.handArr.length < 5) {
     let card = deck.pop();
     dealer.handValue += card.value;
     dealer.aceCount += checkAce(card);
