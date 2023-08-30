@@ -106,17 +106,18 @@ Overall, the wireframe was helpful in getting an idea of how the game is suppose
 - Implementing an Ace value of 10 for specific scenarios
 - Implementing multi-player capabilities so that the dealer can really flex his/her advantage
 
-##Summary
+## Summary
 
 As this was my very first time creating a web browser game, I am extremely glad that I managed to produce a playable game. However, creating the game would not be possible without the help of my instructors, as well as various resources that can be found on the internet. The CSS card library actually provided a great foundation for me to start building my web browser game from, and from there it was really just about tweaking the code to generate my Ban Luck version's game-ending scenarios.
 
-##References and Resources
+## References and Resources
 
 As I am completely new to JavaScript, there were plenty of concepts for me to learn and get used to. I also had to confirm that my version of Ban Luck was not too divergent from the norm and to implement the various game-ending conditions.
 
-[Seedly's Guide to Ban Luck](https://blog.seedly.sg/guide-to-winning-ban-luck-blackjack-this-chinese-new-year-cny)
-[Chinese Blackjack - Wikipedia](https://en.wikipedia.org/wiki/Chinese_Blackjack)
+[Seedly's Guide to Ban Luck](https://blog.seedly.sg/guide-to-winning-ban-luck-blackjack-this-chinese-new-year-cny)  
+[Chinese Blackjack - Wikipedia](https://en.wikipedia.org/wiki/Chinese_Blackjack)  
 
-[CSS Card Library - Amazing looking cards!](https://replit.com/@SEIStudent/How-to-Use-CSS-Card-Library#index.html)
-[Blackjack Game built in a different style](https://github.com/ImKennyYip/black-jack)
+[CSS Card Library - Amazing looking cards!](https://replit.com/@SEIStudent/How-to-Use-CSS-Card-Library#index.html)  
+[Blackjack Game built in a different style](https://github.com/ImKennyYip/black-jack)  
+##
 
