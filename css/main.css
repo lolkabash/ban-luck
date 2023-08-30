@@ -6,9 +6,9 @@ body {
   font-family: sans-serif;
   font-size: 18px;
   font-weight: bold;
-  text-shadow: -1px 1px 2px black, 1px 2px 6px black,
-  1px -1px 0 black, -1px -1px 0 black;
-  color: #FFFDD0;
+  text-shadow: -1px 1px 2px black, 1px 2px 6px black, 1px -1px 0 black,
+    -1px -1px 0 black;
+  color: #fffdd0;
   text-align: center;
   background-color: #35654d;
   background-size: cover;
@@ -17,16 +17,30 @@ body {
   opacity: 0.75;
 }
 
+button {
+  font-size: 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+
+#start-button {
+  font-size: 13px;
+}
+
+#error-message {
+  color: #ffcebd;
+  font-style: italic;
+  font-size: 16px;
+}
+
 #end-screen {
   background-color: #35654d;
   opacity: 0.75;
   font-weight: bolder;
-}
-
-#error-message {
-  color: #FFCEBD;
-  font-style: italic;
-  font-size: 16px;
 }
 
 .card-container {

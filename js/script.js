@@ -3,11 +3,10 @@
 /*----- constants -----*/
 const startScreen = document.querySelector("#start-screen");
 const gameScreen = document.querySelector("#game-screen");
-const endScreen = document.querySelector("#end-screen");
+const resultScreen = document.querySelector("#result-screen");
 
 const playerHand = document.querySelector("#player-hand");
 const dealerHand = document.querySelector("#dealer-hand");
-const hands = document.querySelectorAll(".hand");
 
 const startButton = document.querySelector("#start-button");
 const hitButton = document.querySelector("#hit-button");
@@ -32,25 +31,15 @@ const ranks = [
   "K",
   "A",
 ];
-const deck = [];
 
 /*----- state variables -----*/
-let playerBalance = 1000;
-let betValue = 0;
-// result 0 = draw, 1 = player wins, 2 = player loses, 3 = player runs
-let gameResult = 0;
-let betResult = 0;
+let gameResult = 0; // 0 = draw, 1 = player wins, 2 = player loses, 3 = player runs
+let deck = [];
 
-let playerHandArr = [];
-let dealerHandArr = [];
-let playerHandValue = 0;
-let dealerHandValue = 0;
-let playerAceCount = 0;
-let dealerAceCount = 0;
+const player = { handArr: [], handValue: 0, aceCount: 0, balance: 1000 };
+const dealer = { handArr: [], handValue: 0, aceCount: 0 };
 
-/*----- cached elements  -----*/
-gameScreen.style.display = "none";
-endScreen.style.display = "none";
+const bet = { value: 0, result: 0 };
 
 /*----- event listeners -----*/
 startButton.addEventListener("click", startGame);
@@ -61,281 +50,7 @@ continueButton.addEventListener("click", continueGame);
 exitButton.addEventListener("click", exitGame);
 
 /*----- functions -----*/
-//* game state------------------------
-function renderStartScreen() {
-  const playerBal = document.querySelector("#player-balance");
-  playerBal.innerHTML = "";
-  playerBal.innerText = `Your current balance is $${playerBalance}`;
-}
-renderStartScreen();
-
-function bet() {
-  const errorMessage = document.querySelector("#error-message");
-  errorMessage.innerText = "";
-  betValue = document.querySelector("input").value;
-  if (betValue > playerBalance) {
-    startScreen.style.display = "block";
-    gameScreen.style.display = "none";
-    errorMessage.innerText= `Your bet cannot be more than your current balance! Please enter a lower bet.`;
-    return;
-  } else if (betValue <= 0) {
-    startScreen.style.display = "block";
-    gameScreen.style.display = "none";
-    errorMessage.innerText = `Your bet is invalid. Please enter a whole number greater than zero.`;
-    return;
-  }
-  return betValue;
-}
-
-function startGame() {
-  startScreen.style.display = "none";
-  gameScreen.style.display = "block";
-  bet();
-  buildDeck();
-  shuffleDeck();
-  dealPlayerHand();
-  dealDealerHand();
-  renderGameScreen();
-  checkInstant();
-}
-
-function renderHands(cards, container) {
-  container.innerHTML = "";
-  let cardHtml = "";
-  cards.forEach(function (card) {
-    cardHtml += `<div class="card ${card.face}"></div>`;
-  });
-  container.innerHTML = cardHtml;
-}
-
-function checkAce(card) {
-  if (card.rank === "A") {
-    return 1;
-  }
-  return 0;
-}
-
-function dealPlayerHand() {
-  playerHandArr = [];
-  playerHandValue = 0;
-  playerAceCount = 0;
-  for (i = 0; i < 2; i++) {
-    let card = deck.pop();
-    playerHandValue += card.value;
-    playerAceCount += checkAce(card);
-    playerHandArr.push(card);
-  }
-}
-
-function dealDealerHand() {
-  dealerHandArr = [];
-  dealerHandValue = 0;
-  dealerAceCount = 0;
-  for (i = 0; i < 2; i++) {
-    let card = deck.pop();
-    dealerHandValue += card.value;
-    dealerAceCount += checkAce(card);
-    dealerHandArr.push(card);
-  }
-}
-
-function renderGameScreen() {
-  hitButton.disabled = false;
-  standButton.disabled = false;
-  runButton.disabled = true;
-  renderHands(playerHandArr, playerHand);
-  renderHands(dealerHandArr, dealerHand);
-
-  if (playerHandValue === 15) {
-    standButton.disabled = true;
-    runButton.disabled = false;
-  } else if (playerHandValue < 16) {
-    standButton.disabled = true;
-  }
-}
-
-function checkInstant() {
-  if (playerHandValue === 21 && dealerHandValue !== 21) {
-    betResult = parseInt(betValue) * 2;
-    playerBalance = playerBalance + betResult;
-    gameResult = 1;
-    endGame();
-  } else if (
-    playerHandArr[0].rank === "A" &&
-    playerHandArr[1].rank === "A" &&
-    dealerHandArr[0].rank !== "A" &&
-    dealerHandValue !== 21
-  ) {
-    betResult = parseInt(betValue) * 3;
-    playerBalance = playerBalance + betResult;
-    gameResult = 1;
-    endGame();
-  } else if (dealerHandValue === 21 && playerHandValue !== 21) {
-    betResult = parseInt(betValue) * 2;
-    playerBalance = playerBalance - betResult;
-    gameResult = 2;
-    endGame();
-  } else if (
-    dealerHandArr[0].rank === "A" &&
-    dealerHandArr[1].rank === "A" &&
-    playerHandArr[0].rank !== "A" &&
-    playerHandValue !== 21
-  ) {
-    betResult = parseInt(betValue) * 3;
-    playerBalance = playerBalance + betResult;
-    gameResult = 2;
-    endGame();
-  } else if (playerHandValue === 21 && dealerHandValue === 21) {
-    gameResult = 0;
-    endGame();
-  } else if (
-    playerHandArr[0].rank === "A" &&
-    playerHandArr[1].rank === "A" &&
-    dealerHandArr[0].rank === "A" &&
-    dealerHandArr[1].rank === "A"
-  ) {
-    gameResult = 0;
-    endGame();
-  }
-}
-
-function reduceAce(handValue, aceCount) {
-  while (handValue > 21 && aceCount > 0) {
-    handValue -= 10;
-    aceCount--;
-  }
-  return {handValue, aceCount};
-}
-
-function clickHit() {
-  let card = deck.pop();
-  playerHandValue += card.value;
-  playerAceCount += checkAce(card);
-  let player = reduceAce(playerHandValue, playerAceCount);
-  playerHandValue = player.handValue;
-  playerAceCount = player.aceCount;
-  playerHandArr.push(card);
-  renderHands(playerHandArr, playerHand);
-
-  if (playerHandValue >= 16) {
-    standButton.disabled = false;
-    runButton.disabled = true;
-  }
-  if (playerHandValue > 21 || playerHandArr.length === 5) {
-    hitButton.disabled = true;
-  }
-}
-
-function checkHit() {
-  if (playerHandArr.length === 5 && playerHandValue <= 21) {
-    betResult = parseInt(betValue) * 2;
-    playerBalance = playerBalance + betResult;
-    gameResult = 1;
-    endGame();
-  } else if (
-    playerHandArr.length === 3 &&
-    playerHandArr[0].rank === "07" &&
-    playerHandArr[1].rank === "07" &&
-    playerHandArr[2].rank === "07"
-  ) {
-    betResult = parseInt(betValue) * 7;
-    playerBalance = playerBalance + betResult;
-    gameResult = 1;
-    endGame();
-  }
-}
-
-function hit() {
-  clickHit();
-  checkHit();
-}
-
-function stand() {
-  determineResult();
-}
-
-function run() {
-  gameResult = 3;
-  endGame();
-}
-
-function dealerTurn() {
-  while (dealerHandValue < 16 && dealerHandArr.length < 5) {
-    let card = deck.pop();
-    dealerHandValue += card.value;
-    dealerAceCount += checkAce(card);
-    let dealer = reduceAce(dealerHandValue, dealerAceCount);
-    dealerHandValue = dealer.handValue;
-    dealerAceCount = dealer.aceCount;
-    dealerHandArr.push(card);
-    renderHands(dealerHandArr, dealerHand);
-  }
-}
-
-function determineResult() {
-  dealerTurn();
-  if (
-    playerHandValue > 21 ||
-    (dealerHandValue <= 21 && dealerHandValue > playerHandValue)
-  ) {
-    betResult = parseInt(betValue);
-    playerBalance = playerBalance - betResult;
-    gameResult = 2;
-  } else if (
-    dealerHandValue > 21 ||
-    (playerHandValue <= 21 && playerHandValue > dealerHandValue)
-  ) {
-    betResult = parseInt(betValue);
-    playerBalance = playerBalance + betResult;
-    gameResult = 1;
-  } else {
-    gameResult = 0;
-  }
-  endGame();
-}
-
-function endGame() {
-  endScreen.style.display = "block";
-  renderEndScreen();
-}
-
-function renderEndScreen() {
-  hitButton.disabled = true;
-  standButton.disabled = true;
-  runButton.disabled = true;
-  const endState = document.querySelector("#end-state");
-  endState.innerText = "";
-  if (gameResult === 1) {
-    endState.innerText = `Congratulations! You won $${betResult} :)`;
-  } else if (gameResult === 2) {
-    endState.innerText = `Oh no! You lost $${betResult} :(`;
-  } else if (gameResult === 3) {
-    endState.innerText = `You decided to run! Let's go again!`;
-  } else {
-    endState.innerText = `It's a draw!`;
-  }
-  const playerBal = document.querySelector("#player-new-balance");
-  playerBal.innerText = `Your new balance is $${playerBalance}`;
-  endState.append(playerBal);
-  return playerBal;
-}
-
-function continueGame() {
-  gameScreen.style.display = "none";
-  endScreen.style.display = "none";
-  startScreen.style.display = "block";
-  renderStartScreen();
-}
-
-function exitGame() {
-  gameScreen.style.display = "none";
-  endScreen.style.display = "none";
-  startScreen.style.display = "block";
-  playerBalance = 1000;
-  renderStartScreen();
-}
-
-//* card library-----------------------
+//* deck functions-----------------------
 function buildDeck() {
   suits.forEach(function (suit) {
     ranks.forEach(function (rank) {
@@ -356,4 +71,301 @@ function shuffleDeck() {
     deck[i] = deck[rndIdx];
     deck[rndIdx] = tempDeck;
   }
+}
+
+//* game state---------------------------
+function init() {
+  gameScreen.style.display = "none";
+  resultScreen.style.display = "none";
+  const playerBal = document.querySelector("#player-balance");
+  playerBal.innerHTML = "";
+  playerBal.innerText = `Your current balance is $${player.balance}`;
+}
+
+init();
+
+function startGame() {
+  startScreen.style.display = "none";
+  gameScreen.style.display = "block";
+  player.handArr = [];
+  player.handValue = 0;
+  player.aceCount = 0;
+  dealer.handArr = [];
+  dealer.handValue = 0;
+  dealer.aceCount = 0;
+  deck = [];
+  betting();
+  buildDeck();
+  shuffleDeck();
+  dealHands(player);
+  dealHands(dealer);
+  renderGameScreen();
+  checkInstant();
+}
+
+function betting() {
+  const errorMessage = document.querySelector("#error-message");
+  errorMessage.innerText = "";
+  bet.value = document.querySelector("input").value;
+  if (bet.value > player.balance) {
+    startScreen.style.display = "block";
+    gameScreen.style.display = "none";
+    resultScreen.style.display = "none";
+    errorMessage.innerText = `Your bet cannot be more than your current balance! Please enter a lower bet.`;
+  } else if (bet.value <= 0) {
+    startScreen.style.display = "block";
+    gameScreen.style.display = "none";
+    resultScreen.style.display = "none";
+    errorMessage.innerText = `Your bet is invalid. Please enter a whole number greater than zero.`;
+  }
+  return bet.value;
+}
+
+function dealHands(person) {
+  for (i = 0; i < 2; i++) {
+    let card = deck.pop();
+    person.handValue += card.value;
+    person.aceCount += checkAce(card);
+    person.handArr.push(card);
+  }
+}
+
+function checkAce(card) {
+  if (card.rank === "A") {
+    return 1;
+  }
+  return 0;
+}
+
+function renderGameScreen() {
+  hitButton.disabled = false;
+  standButton.disabled = false;
+  runButton.disabled = true;
+  renderHands(player.handArr, playerHand);
+  renderDealerStartHand(dealer.handArr, dealerHand);
+
+  if (player.handValue === 15) {
+    standButton.disabled = true;
+    runButton.disabled = false;
+  } else if (player.handValue < 16) {
+    standButton.disabled = true;
+  }
+}
+
+function renderHands(cards, container) {
+  container.innerHTML = "";
+  let cardHtml = "";
+  cards.forEach(function (card) {
+    cardHtml += `<div class="card ${card.face}"></div>`;
+  });
+  container.innerHTML = cardHtml;
+}
+
+function renderDealerStartHand(cards, container) {
+  container.innerHTML = "";
+  let hiddenCardHtml = "";
+  let cardHtml = "";
+  hiddenCardHtml += `<div class="card back-blue"></div>`;
+  for (i = 1; i < cards.length; i++) {
+    cardHtml += `<div class="card ${cards[i].face}"></div>`;
+  }
+  container.innerHTML = hiddenCardHtml + cardHtml;
+}
+
+function checkInstant() {
+  if (player.handValue === 21 && dealer.handValue !== 21) {
+    bet.result = parseInt(bet.value) * 2;
+    player.balance = player.balance + bet.result;
+    gameResult = 1;
+    displayResult();
+  } else if (
+    player.handArr[0].rank === "A" &&
+    player.handArr[1].rank === "A" &&
+    dealer.handArr[0].rank !== "A" &&
+    dealer.handValue !== 21
+  ) {
+    bet.result = parseInt(bet.value) * 3;
+    player.balance = player.balance + bet.result;
+    gameResult = 1;
+    displayResult();
+  } else if (dealer.handValue === 21 && player.handValue !== 21) {
+    bet.result = parseInt(bet.value) * 2;
+    player.balance = player.balance - bet.result;
+    gameResult = 2;
+    displayResult();
+  } else if (
+    dealer.handArr[0].rank === "A" &&
+    dealer.handArr[1].rank === "A" &&
+    player.handArr[0].rank !== "A" &&
+    player.handValue !== 21
+  ) {
+    bet.result = parseInt(bet.value) * 3;
+    player.balance = player.balance - bet.result;
+    gameResult = 2;
+    displayResult();
+  } else if (player.handValue === 21 && dealer.handValue === 21) {
+    gameResult = 0;
+    displayResult();
+  } else if (
+    player.handArr[0].rank === "A" &&
+    player.handArr[1].rank === "A" &&
+    dealer.handArr[0].rank === "A" &&
+    dealer.handArr[1].rank === "A"
+  ) {
+    gameResult = 0;
+    displayResult();
+  }
+}
+
+function hit() {
+  clickHit();
+  checkHit();
+}
+
+function clickHit() {
+  let card = deck.pop();
+  player.handValue += card.value;
+  player.aceCount += checkAce(card);
+  let playerAce = reduceAce(player.handValue, player.aceCount);
+  player.handValue = playerAce.handValue;
+  player.aceCount = playerAce.aceCount;
+  player.handArr.push(card);
+  renderHands(player.handArr, playerHand);
+
+  if (player.handValue >= 16) {
+    standButton.disabled = false;
+    runButton.disabled = true;
+  }
+  if (player.handValue > 21 || player.handArr.length === 5) {
+    hitButton.disabled = true;
+  }
+}
+
+function reduceAce(handValue, aceCount) {
+  while (handValue > 21 && aceCount > 0) {
+    handValue -= 10;
+    aceCount--;
+  }
+  return { handValue, aceCount };
+}
+
+function checkHit() {
+  if (player.handArr.length === 5 && player.handValue <= 21) {
+    bet.result = parseInt(bet.value) * 2;
+    player.balance = player.balance + bet.result;
+    gameResult = 1;
+    displayResult();
+  } else if (
+    player.handArr.length === 3 &&
+    player.handArr[0].rank === "07" &&
+    player.handArr[1].rank === "07" &&
+    player.handArr[2].rank === "07"
+  ) {
+    bet.result = parseInt(bet.value) * 7;
+    player.balance = player.balance + bet.result;
+    gameResult = 1;
+    displayResult();
+  }
+}
+
+function stand() {
+  determineResult();
+}
+
+function run() {
+  gameResult = 3;
+  displayResult();
+}
+
+function dealerTurn() {
+  dealerHit();
+  checkDealerHit();
+}
+
+function dealerHit() {
+  while (dealer.handValue < 16 && dealer.handArr.length < 5) {
+    let card = deck.pop();
+    dealer.handValue += card.value;
+    dealer.aceCount += checkAce(card);
+    let dealerAce = reduceAce(dealer.handValue, dealer.aceCount);
+    dealer.handValue = dealerAce.handValue;
+    dealer.aceCount = dealerAce.aceCount;
+    dealer.handArr.push(card);
+  }
+}
+
+function checkDealerHit() {
+  if (dealer.handArr.length === 5 && dealer.handValue <= 21) {
+    bet.result = parseInt(bet.value) * 2;
+    player.balance = player.balance - bet.result;
+    gameResult = 2;
+    displayResult();
+  } else if (
+    dealer.handArr.length === 3 &&
+    dealer.handArr[0].rank === "07" &&
+    dealer.handArr[1].rank === "07" &&
+    dealer.handArr[2].rank === "07"
+  ) {
+    bet.result = parseInt(bet.value) * 7;
+    player.balance = player.balance - bet.result;
+    gameResult = 1;
+    displayResult();
+  }
+}
+
+function determineResult() {
+  dealerTurn();
+  bet.result = parseInt(bet.value);
+  if (
+    (player.handValue > 21 && dealer.handValue <= 21) ||
+    (dealer.handValue <= 21 && dealer.handValue > player.handValue)
+  ) {
+    player.balance = player.balance - bet.result;
+    gameResult = 2;
+  } else if (
+    (dealer.handValue > 21 && player.handValue <= 21) ||
+    (player.handValue <= 21 && player.handValue > dealer.handValue)
+  ) {
+    player.balance = player.balance + bet.result;
+    gameResult = 1;
+  } else {
+    gameResult = 0;
+  }
+  displayResult();
+}
+
+function displayResult() {
+  renderHands(dealer.handArr, dealerHand);
+  resultScreen.style.display = "block";
+  hitButton.disabled = true;
+  standButton.disabled = true;
+  runButton.disabled = true;
+  const result = document.querySelector("#result");
+  result.innerText = "";
+  if (gameResult === 1) {
+    result.innerText = `Congratulations! You won $${bet.result} :)`;
+  } else if (gameResult === 2) {
+    result.innerText = `Oh no! You lost $${bet.result} :(`;
+  } else if (gameResult === 3) {
+    result.innerText = `You decided to run! Let's go again!`;
+  } else {
+    result.innerText = `It's a draw!`;
+  }
+  const playerBal = document.querySelector("#player-new-balance");
+  playerBal.innerText = `Your new balance is $${player.balance}`;
+}
+
+function continueGame() {
+  gameScreen.style.display = "none";
+  resultScreen.style.display = "none";
+  startScreen.style.display = "block";
+  init();
+}
+
+function exitGame() {
+  gameScreen.style.display = "none";
+  resultScreen.style.display = "none";
+  startScreen.style.display = "block";
+  player.balance = 1000;
+  init();
 }
