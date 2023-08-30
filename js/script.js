@@ -74,6 +74,8 @@ function shuffleDeck() {
 }
 
 //* game state---------------------------
+init();
+
 function init() {
   gameScreen.style.display = "none";
   resultScreen.style.display = "none";
@@ -81,8 +83,6 @@ function init() {
   playerBal.innerHTML = "";
   playerBal.innerText = `Your current balance is $${player.balance}`;
 }
-
-init();
 
 function startGame() {
   startScreen.style.display = "none";
@@ -308,7 +308,7 @@ function checkDealerHit() {
   ) {
     bet.result = parseInt(bet.value) * 7;
     player.balance = player.balance - bet.result;
-    gameResult = 1;
+    gameResult = 2;
     displayResult();
   }
 }
