@@ -17,7 +17,6 @@ const exitButton = document.querySelector("#exit-button");
 
 const openButton = document.querySelector("#open-modal");
 const modal = document.querySelector("#modal");
-const closeButton = document.querySelector("#close-modal");
 
 const suits = ["s", "c", "d", "h"];
 const ranks = [

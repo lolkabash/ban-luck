@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ban Luck!</title>
+    <title>Ban Luck - A game of luck, skill and more luck</title>
     <link rel="stylesheet" href="css/card-library/css/cardstarter.css" />
     <link rel="stylesheet" href="css/main.css" />
     <script defer src="js/script.js"></script>
@@ -27,12 +27,62 @@
           </form>
           <h2>How to play Ban Luck</h2>
           <p>
+            The aim of the game is to get your card values as close to 21 as
+            possible without going over or "busting". Each player starts with 2
+            cards and can draw up to a maximum of 5 cards.<br />
+            The values of the cards are - 2-10: face value / J,K,Q: 10 / Ace: 1
+            or 11
           </p>
           <p>
+            Players must end the round with a minimum hand value of 16, and if
+            the player has an initial hand value of exactly 15, there is an
+            option to run and not participate in the round.<br />
+            Players choose "Hit" to draw another card and "Stand" to maintain the cards that they currently have in their hand.
           </p>
-          <p>
+          <br />
+          <p>There are various game-ending scenarios:<br />
+            <table>
+              <tr>
+                <th>Player Wins</th>
+                <th>Player Loses</th>
+                <th>Draw</th>
+              </tr>
+              <tr>
+                <td>pValue &lt;= 21 and pValue &gt; dValue: Player wins 1x Bet Amt</td>
+                <td>dValue &lt;= 21 and dValue &gt; pValue: Player loses 1x Bet Amt</td>
+                <td>pValue = dValue and both values are &lt;= 21: Draw</td>
+              </tr>
+              <tr>
+                <td>pValue &lt;= 21 and dValue &gt; 21: Player wins 1x Bet Amt</td>
+                <td>dValue &lt;= 21 and pValue &gt; 21: Player loses 1x Bet Amt</td>
+                <td>pValue &gt; 21 and dValue &gt; 21: Draw</td>
+              </tr>
+              <tr>
+                <td>Ban Luck (Ace + 10/J/Q/K): Player wins 2x Bet Amt</td>
+                <td>dealer gets Ban Luck: Player loses 2x Bet Amt</td>
+                <td>player and dealer both obtain Ban Luck or Ban Ban: Draw</td>
+              </tr>
+              <tr>
+                <td>Wu Long (5-Dragon) (pValue &lt;= 21 and player has 5 cards): Player wins 2x Bet Amt</td>
+                <td>dealer gets 5-Dragon/player misses 5-Dragon (pValue &gt; 21 after drawing 5th card): Player loses 2x Bet Amt</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Ban Ban (Ace + Ace): Player wins 3x Bet Amt</td>
+                <td>dealer gets Ban Ban: Player loses 3x Bet Amt</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Triple Seven (player gets 3 7s): Player wins 7x Bet Amt</td>
+                <td>dealer gets Triple Seven: Player loses 7x Bet Amt</td>
+                <td></td>
+              </tr>
+            </table>
+            <br />
+            *pValue = player's hand value and dValue = dealer's hand value
           </p>
-          <h3>May the odds be ever in your favour :)</h3>
+          <br />
+          <h2>May the odds be ever in your favour :)</h2>
         </div>
       </dialog>
     </div>
@@ -49,6 +99,7 @@
       </div>
     </div>
     <br />
+
     <div id="result-screen">
       <p id="result"></p>
       <p id="player-new-balance"></p>
