@@ -15,6 +15,10 @@ const runButton = document.querySelector("#run-button");
 const continueButton = document.querySelector("#continue-button");
 const exitButton = document.querySelector("#exit-button");
 
+const openButton = document.querySelector("#open-modal");
+const modal = document.querySelector("#modal");
+const closeButton = document.querySelector("#close-modal");
+
 const suits = ["s", "c", "d", "h"];
 const ranks = [
   "02",
@@ -48,6 +52,7 @@ standButton.addEventListener("click", stand);
 runButton.addEventListener("click", run);
 continueButton.addEventListener("click", continueGame);
 exitButton.addEventListener("click", exitGame);
+openButton.addEventListener("click", openModal);
 
 /*----- functions -----*/
 //* deck functions-----------------------
@@ -373,4 +378,8 @@ function exitGame() {
   startScreen.style.display = "block";
   player.balance = 1000;
   init();
+}
+
+function openModal() {
+  modal.showModal();
 }
