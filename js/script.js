@@ -349,8 +349,11 @@ function displayResult() {
   hitButton.disabled = true;
   standButton.disabled = true;
   runButton.disabled = true;
+  continueButton.disabled = false;
   const result = document.querySelector("#result");
   result.innerText = "";
+  const bankrupt = document.querySelector("#bankrupt");
+  bankrupt.innerText = "";
   if (gameResult === 1) {
     result.innerText = `Congratulations! You won $${bet.result} :)`;
   } else if (gameResult === 2) {
@@ -362,6 +365,11 @@ function displayResult() {
   }
   const playerBal = document.querySelector("#player-new-balance");
   playerBal.innerText = `Your new balance is $${player.balance}`;
+  console.log(player.balance);
+  if (player.balance <= 0) {
+    continueButton.disabled = true;
+    bankrupt.innerText = `You have no money left to continue, better luck next time!`;
+  }
 }
 
 function continueGame() {
