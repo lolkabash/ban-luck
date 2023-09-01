@@ -107,6 +107,10 @@ function startGame() {
   checkInstant();
 }
 
+function isInt(value) {
+  return !isNaN(value) && (function(x) { return (x | 0) === x; })(parseFloat(value))
+}
+
 function betting() {
   const errorMessage = document.querySelector("#error-message");
   errorMessage.innerText = "";
@@ -116,13 +120,13 @@ function betting() {
     gameScreen.style.display = "none";
     resultScreen.style.display = "none";
     errorMessage.innerText = `Your bet cannot be more than your current balance! Please enter a lower bet.`;
-  } else if (bet.value <= 0) {
+  } else if (bet.value <= 0 || isInt(bet.value)) {
     startScreen.style.display = "block";
     gameScreen.style.display = "none";
     resultScreen.style.display = "none";
     errorMessage.innerText = `Your bet is invalid. Please enter a whole number greater than zero.`;
   }
-  return bet.value;
+  return parseInt(Number(bet.value));
 }
 
 function dealHands(person) {
